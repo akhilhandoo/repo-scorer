@@ -1,0 +1,13 @@
+github:
+  base-api:
+    url: "https://api.github.com/search/repositories"
+    timeout: 5
+    size: 100
+    params:
+      "language": "language"
+      "earliestCreatedDate": "created"
+  scoring:
+    mechanism: Advanced
+    stars-weight: 4.0f
+    forks-weight: 6.0f
+    recency-weight: 10.0f
