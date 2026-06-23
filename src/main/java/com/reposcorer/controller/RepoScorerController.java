@@ -3,14 +3,12 @@ package com.reposcorer.controller;
 import com.reposcorer.representation.Repo;
 import com.reposcorer.service.RepoScorerService;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -24,7 +22,6 @@ public class RepoScorerController {
   public ResponseEntity<List<Repo>> scoreRepos(
           @PathVariable("query") String query,
           @RequestParam Map<String, String> queryParams) {
-    var data = repoScorerService.findRepositoryAndComputeScore(query, queryParams);
-    return ResponseEntity.ok(data);
+    return ResponseEntity.ok(repoScorerService.findRepositoryAndComputeScore(query, queryParams));
   }
 }

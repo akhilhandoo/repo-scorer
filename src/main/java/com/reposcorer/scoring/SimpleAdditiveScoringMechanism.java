@@ -10,6 +10,6 @@ public class SimpleAdditiveScoringMechanism implements RepoScoringMechanism {
 
     @Override
     public int computeScore(Repo repo) {
-        return repo.getForksCount() + repo.getStargazersCount() + ((int) (Duration.between(Instant.now(), repo.getUpdatedAt()).toDays() / 10));
+        return repo.getForksCount() + repo.getStargazersCount() + ((int) (Duration.between(repo.getUpdatedAt(), Instant.now()).toDays() / 10));
     }
 }

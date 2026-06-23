@@ -61,4 +61,23 @@ public class RepoScorerServiceTest {
         Assertions.assertEquals(List.of(repo.toBuilder().score(10).build()), listOfRepo);
     }
 
+    @Test
+    public void returnsExpectedRepositoriesWithSimpleScores() {
+        //  Given
+        var createdInstant = LocalDate.of(2024, 05, 01).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        var updatedInstant = LocalDate.of(2026, 05, 01).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Repository repository = new Repository(1, "Mockito Java Library", "http://www.mockito.org", "A library of mocks", 100, 25, "Java", createdInstant, updatedInstant);
+        Repo repo = Repo.builder().id(1).fullName("Mockito Java Library").description("A library of mocks").htmlUrl("http://www.mockito.org").stargazersCount(100).forksCount(25).language("Java").createdAt(createdInstant).updatedAt(updatedInstant).build();
+        Mockito.when(githubClient.getAllRepositories("query", Map.of("scoringMechanism", "Simple"))).thenReturn(List.of(repository));
+        Mockito.when(repositoryMapper.fromRepository(repository)).thenReturn(repo);
+        Mockito.when(repoScoringMechanismProvider.getRepoScoringMechanism("Simple")).thenReturn(repoScoringMechanism);
+        Mockito.when(repoScoringMechanism.computeScore(repo)).thenReturn(15);
+
+        //  When
+        var listOfRepo = repoScorerService.findRepositoryAndComputeScore("query", Map.of("scoringMechanism", "Simple"));
+
+        //  Then
+        Assertions.assertEquals(List.of(repo.toBuilder().score(15).build()), listOfRepo);
+    }
+
 }

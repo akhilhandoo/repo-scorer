@@ -34,7 +34,6 @@ public class GithubClient {
   //  search is designed with asynchronous http communication and multiple concurrent calls to the Github API in mind.
   public Future<SearchResponse> search(String queryString, int page) {
     String url = remoteConfiguration.getUrl() + "?" + queryString + "&page=" + page;
-    System.out.println("URL -> " + url);
     return httpClient
         .sendAsync(
             HttpRequest.newBuilder().uri(URI.create(url))
