@@ -4,9 +4,8 @@ import com.reposcorer.remote.GithubClient;
 import com.reposcorer.representation.Repo;
 import com.reposcorer.representation.mapper.RepositoryMapper;
 import com.reposcorer.scoring.RepoScoringMechanismProvider;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,20 +23,22 @@ public class RepoScorerService {
   private String configuredScoringMechanism;
 
   public List<Repo> findRepositoryAndComputeScore(String query, Map<String, String> queryParams) {
-    String scoringMechanismToUse =
-        Optional.ofNullable(queryParams.get("scoringMechanism")).orElse(configuredScoringMechanism);
+    var scoringMechanismToUse =
+        Optional.ofNullable(
+                repoScoringMechanismProvider.getRepoScoringMechanism(
+                    queryParams.get("scoringMechanism")))
+            .orElse(
+                repoScoringMechanismProvider.getRepoScoringMechanism(configuredScoringMechanism));
     var repositories = githubClient.getAllRepositories(query, queryParams);
-    return repositories.stream()
-        .map(
-            repository -> {
-              var repo = repositoryMapper.fromRepository(repository);
-              return repo.toBuilder()
-                  .score(
-                      repoScoringMechanismProvider
-                          .getRepoScoringMechanism(scoringMechanismToUse)
-                          .computeScore(repo))
-                  .build();
-            })
-        .collect(Collectors.toUnmodifiableList());
+    var enrichedRepoList =
+        repositories.stream()
+            .map(
+                repository -> {
+                  var repo = repositoryMapper.fromRepository(repository);
+                  return repo.toBuilder().score(scoringMechanismToUse.computeScore(repo)).build();
+                })
+            .collect(Collectors.toList());
+    Collections.sort(enrichedRepoList, Comparator.comparingInt(Repo::getScore).reversed());
+    return enrichedRepoList;
   }
 }
